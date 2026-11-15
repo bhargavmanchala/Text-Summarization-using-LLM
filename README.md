@@ -96,4 +96,5 @@ Contributions follow [CONTRIBUTING.md](CONTRIBUTING.md). Release notes are in
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE) for the code. The default model is licensed **CC BY-NC 4.0 (non-commercial)**; see
+[NOTICE.md](NOTICE.md) for third-party licenses.
