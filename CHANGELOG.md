@@ -10,6 +10,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow
 - Unit tests, ruff configuration and a GitHub Actions workflow.
 - `docs/ARCHITECTURE.md` design notes. Original project reports, slides and demo video are kept
   out of version control.
+- `reference/` with the main source files from the four earlier repositories (API key redacted).
 - README, architecture notes, contributing guide and `.env.example`.
 
 ### Changed
@@ -21,5 +22,5 @@ Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow
 - Legacy `App.py`, `QA.py` and `Sumz.py`, and the commented-out dead code.
 
 ### Security
-- The Google API key that was committed to the earlier repositories must be revoked; it remains in
-  their git history.
+- The Google API key committed to the earlier repositories, and a Hugging Face token printed in the
+  old project report PDF, must be revoked; both remain in those repositories' git history.

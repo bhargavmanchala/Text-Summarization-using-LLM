@@ -133,6 +133,7 @@ textsum/                Core library (no UI code)
   config.py             Settings from environment variables
   chunking.py           Text and token chunking helpers
 tests/                  Unit tests (fake models, no downloads)
+reference/              Original code from the earlier repos (read-only, see its README)
 docs/ARCHITECTURE.md    Design notes
 .github/workflows/      CI: lint and tests
 ```
