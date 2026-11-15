@@ -1,46 +1,114 @@
-# Text Summarization using LLM
+# 📄 Text Summarization using LLM
 
-A Streamlit app that **summarizes text, PDFs and images** with a local language model and lets you
-**ask questions about your PDFs**. It started as a college mini-project and is now a single,
-tested codebase.
+Summarize long documents and ask questions about your PDFs, using a language model that runs on
+your own machine.
 
 [![CI](https://github.com/bhargavmanchala/Text-Summarization-using-LLM/actions/workflows/ci.yml/badge.svg)](https://github.com/bhargavmanchala/Text-Summarization-using-LLM/actions/workflows/ci.yml)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Built with Streamlit](https://img.shields.io/badge/built%20with-Streamlit-ff4b4b)
+
+## Contents
+
+- [Overview](#overview)
+- [Features](#features)
+- [How it works](#how-it-works)
+- [Quick start](#quick-start)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [Project structure](#project-structure)
+- [Tech stack](#tech-stack)
+- [Development](#development)
+- [Troubleshooting](#troubleshooting)
+- [Limitations and roadmap](#limitations-and-roadmap)
+- [License](#license)
+
+## Overview
+
+Reading a 40-page report to find the three points that matter is slow. This app condenses text,
+PDFs and even photos of documents into a short summary, and answers questions about a PDF with the
+supporting passages shown next to each answer.
+
+It began as a college mini-project and now combines four earlier repositories into one tested
+codebase with a clean separation between the UI (`app.py`) and the logic (`textsum/`).
 
 ## Features
 
-- **Summarize** pasted text, one or more PDFs, or an image (via OCR), with a short / medium / long
-  length control. Long documents are handled by map-reduce over token chunks, so nothing is
-  silently truncated.
-- **Ask your PDF**: passages are retrieved with BM25 and answered by Google Gemini (if you set an API
-  key) or by the same local model (no key, no cloud).
-- **Runs locally by default**: summarization uses
-  [`MBZUAI/LaMini-Flan-T5-248M`](https://huggingface.co/MBZUAI/LaMini-Flan-T5-248M); PDF text never
-  leaves your machine unless you enable Gemini.
-- Download the summary as a `.txt` file.
+| | |
+|---|---|
+| **Summarize anything** | Paste text, upload one or more PDFs, or upload an image (OCR). |
+| **Any length** | Long documents are summarized chunk by chunk, then merged, so nothing is cut off. |
+| **Length control** | Short, medium or long summaries from a sidebar slider. |
+| **Ask your PDF** | Ask a question and get an answer plus the source passages it came from. |
+| **Private by default** | Summarization and Q&A run locally. Gemini is used only if you opt in with a key. |
+| **Export** | Download the summary as a `.txt` file. |
+
+## How it works
+
+```mermaid
+flowchart LR
+    A[Text / PDF / Image] -->|pypdf or Tesseract OCR| B[Plain text]
+    B --> C[Split into 400-token chunks]
+    C --> D[Summarize each chunk]
+    D -->|more than one chunk?| C
+    D --> E[Final summary]
+    B --> F[Split into passages]
+    F --> G[BM25 search]
+    G --> H[Gemini or local model]
+    H --> I[Answer + sources]
+```
+
+- **Summarization** uses [LaMini-Flan-T5-248M](https://huggingface.co/MBZUAI/LaMini-Flan-T5-248M)
+  with beam search. If the document needs more than one chunk, the chunk summaries are summarized
+  again (up to three rounds).
+- **Question answering** retrieves the most relevant passages with BM25 keyword ranking and asks
+  Gemini (if `GOOGLE_API_KEY` is set) or the local model to answer using only those passages.
+
+More detail in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Quick start
 
-Requires Python 3.10+.
+Requires Python 3.10 or newer and about 2 GB of free disk space for the model and PyTorch.
 
 ```bash
 git clone https://github.com/bhargavmanchala/Text-Summarization-using-LLM.git
 cd Text-Summarization-using-LLM
 python -m venv .venv
-.venv\Scripts\activate        # macOS/Linux: source .venv/bin/activate
+```
+
+Activate the environment (`.venv\Scripts\activate` on Windows, `source .venv/bin/activate` on
+macOS/Linux), then:
+
+```bash
 pip install -r requirements.txt
 streamlit run app.py
 ```
 
-The first summary downloads the model (about 1 GB) and caches it. It runs on CPU, or on a GPU if
-PyTorch can see one.
+Open the URL Streamlit prints (usually http://localhost:8501). The first summary downloads the
+model (about 1 GB) and caches it for later runs. It uses a GPU automatically if PyTorch detects one.
 
-### Optional setup
+## Usage
 
-| Feature | What to do |
-|---|---|
-| Gemini answers for PDF Q&A | Set `GOOGLE_API_KEY` (see [`.env.example`](.env.example)). Never commit the key. |
-| Image OCR | Install [Tesseract](https://github.com/tesseract-ocr/tesseract); set `TESSERACT_CMD` if it is not on `PATH`. |
-| Different model | Set `SUMMARIZER_MODEL` to a Hugging Face id or a local folder (any seq2seq model). |
+**Summarize**
+1. Open the **Summarize** tab and choose an input: *Paste text*, *PDF* or *Image (OCR)*.
+2. Pick a length in the sidebar.
+3. Click **Summarize**, then optionally **Download summary**.
+
+**Ask your PDF**
+1. Open the **Ask your PDF** tab and upload one or more PDFs.
+2. Type a question using words likely to appear in the document.
+3. Read the answer and expand **Source passages** to check where it came from.
+
+## Configuration
+
+All settings are optional environment variables (see [`.env.example`](.env.example)).
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `SUMMARIZER_MODEL` | `MBZUAI/LaMini-Flan-T5-248M` | Hugging Face model id or local folder (any seq2seq model). |
+| `GOOGLE_API_KEY` | unset | Enables Gemini for PDF Q&A. Never commit it. |
+| `GEMINI_MODEL` | `gemini-1.5-flash` | Gemini model used when a key is set. |
+| `TESSERACT_CMD` | unset | Path to the Tesseract executable if it is not on `PATH`. |
 
 PowerShell example:
 
@@ -49,32 +117,30 @@ $env:GOOGLE_API_KEY = "your-key"
 streamlit run app.py
 ```
 
-## Project layout
+Image OCR needs [Tesseract](https://github.com/tesseract-ocr/tesseract) installed separately.
+
+## Project structure
 
 ```
-app.py                  Streamlit UI
+app.py                  Streamlit user interface
 textsum/                Core library (no UI code)
-  summarizer.py         Map-reduce summarization
-  qa.py, retrieval.py   PDF question answering (BM25 + Gemini/local)
-  pdf_io.py, ocr.py     Text extraction
-  models.py, config.py  Model wrapper and environment settings
-tests/                  Unit tests (use fakes; no model download)
-docs/                   Reports, presentation, demo video
+  summarizer.py         Chunked map-reduce summarization
+  qa.py                 Question answering over retrieved passages
+  retrieval.py          BM25 passage search
+  pdf_io.py             PDF text extraction
+  ocr.py                Image text extraction (Tesseract)
+  models.py             Local Hugging Face model wrapper
+  config.py             Settings from environment variables
+  chunking.py           Text and token chunking helpers
+tests/                  Unit tests (fake models, no downloads)
+docs/ARCHITECTURE.md    Design notes
+.github/workflows/      CI: lint and tests
 ```
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for how the pieces fit together.
+## Tech stack
 
-## Project documents
-
-| File | Description |
-|---|---|
-| [Problem statement](docs/report/01-problem-statement.pdf) | What the project set out to solve |
-| [Abstract](docs/report/02-abstract.pdf) | Short project summary |
-| [Full documentation](docs/report/03-project-documentation.pdf) | Mini-project report |
-| [Review presentation](docs/presentation/review-presentation.pdf) | Slides from the project review |
-| [Demo video](docs/media/demo.mp4) | Walkthrough of the original version |
-
-The report and demo describe the original single-model version; this repository extends it.
+Python · Streamlit · PyTorch · Hugging Face Transformers · pypdf · Tesseract OCR · Google Gemini
+(optional) · pytest · Ruff · GitHub Actions
 
 ## Development
 
@@ -84,15 +150,26 @@ ruff check .
 pytest
 ```
 
-Contributions follow [CONTRIBUTING.md](CONTRIBUTING.md). Release notes are in
-[CHANGELOG.md](CHANGELOG.md).
+Tests use small fake models, so they run in under a second with no network. Please read
+[CONTRIBUTING.md](CONTRIBUTING.md) first; release notes are in [CHANGELOG.md](CHANGELOG.md).
 
-## Limitations
+## Troubleshooting
 
-- A 248M-parameter model gives good-not-great summaries; use a larger model via `SUMMARIZER_MODEL`
-  for better quality.
-- Scanned PDFs have no text layer. Convert pages to images and use the OCR input.
-- BM25 matches keywords, not meaning, so phrase questions with words from the document.
+| Problem | Fix |
+|---|---|
+| First summary is very slow | The model is downloading (about 1 GB). Later runs reuse the cache. |
+| `Tesseract is not installed` | Install Tesseract, then add it to `PATH` or set `TESSERACT_CMD`. |
+| "No selectable text found" for a PDF | The PDF is scanned. Export its pages as images and use *Image (OCR)*. |
+| "I could not find that in the document" | Rephrase using words that appear in the PDF; search is keyword-based. |
+| Out-of-memory errors | Close other apps, or set `SUMMARIZER_MODEL` to a smaller model. |
+| Gemini errors | Check the key and your network; unset `GOOGLE_API_KEY` to use the local model. |
+
+## Limitations and roadmap
+
+- A 248M-parameter model gives readable but basic summaries. Use a larger model via
+  `SUMMARIZER_MODEL` for higher quality.
+- Question answering is keyword-based (BM25), not semantic.
+- Planned: semantic retrieval with embeddings, Docker image, support for DOCX and web pages.
 
 ## License
 
