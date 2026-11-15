@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Secrets and local config
+.env
+.streamlit/secrets.toml
+
+# Runtime artifacts
+data/
+faiss_index/
+*.faiss
+*.pkl
+
+# Model weights
+*.bin
+*.safetensors
+*.pt
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
