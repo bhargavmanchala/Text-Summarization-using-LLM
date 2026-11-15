@@ -48,7 +48,7 @@ The index lives in Streamlit's per-session state, so concurrent users do not sha
 ## Testing
 
 `pytest` runs without ML libraries or network: chunking, BM25, config, summarizer logic (with a
-fake model), Q&A flow and PDF extraction (including a real PDF from `docs/`).
+fake model), Q&A flow and PDF extraction (using a PDF generated inside the test).
 
 ## History
 

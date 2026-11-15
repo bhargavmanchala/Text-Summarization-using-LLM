@@ -26,4 +26,4 @@ Types: `feat`, `fix`, `docs`, `refactor`, `test`, `build`, `ci`, `chore`.
 - **Never commit secrets** (API keys, `.env`). Use environment variables.
 - Do not commit model weights, vector indexes or generated files (see `.gitignore`).
 - Add or update a test for behaviour changes. Tests must not download models or call the network.
-- Put documents in `docs/report`, `docs/presentation` or `docs/media`.
+- Keep large binaries (PDFs, videos) out of git; link to them instead.

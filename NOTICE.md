@@ -15,5 +15,4 @@ repository; they are installed or downloaded separately.
 | pytesseract / Tesseract OCR | Apache-2.0 | |
 | google-generativeai | Apache-2.0 | Using Gemini is subject to Google's terms of service. |
 
-Check each project's current license before redistributing. The project documents in `docs/` are
-part of a student mini-project and are covered by the repository license unless noted otherwise.
+Check each project's current license before redistributing.

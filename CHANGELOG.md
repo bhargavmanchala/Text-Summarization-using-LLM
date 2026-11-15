@@ -8,7 +8,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow
 - `textsum` package with map-reduce summarization, BM25 retrieval, PDF Q&A and OCR.
 - Streamlit app with Summarize, Ask your PDF and About tabs, length control and summary download.
 - Unit tests, ruff configuration and a GitHub Actions workflow.
-- `docs/` with the problem statement, abstract, report, presentation and demo video.
+- `docs/ARCHITECTURE.md` design notes. Original project reports, slides and demo video are kept
+  out of version control.
 - README, architecture notes, contributing guide and `.env.example`.
 
 ### Changed

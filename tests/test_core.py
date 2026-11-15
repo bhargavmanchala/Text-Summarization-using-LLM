@@ -104,8 +104,29 @@ def test_extract_text_rejects_garbage_and_empty_pdf():
         extract_text(buf)
 
 
-def test_extract_text_from_repo_pdf():
-    from pathlib import Path
+def _text_pdf(text: str) -> bytes:
+    """Build a minimal one-page PDF containing ``text``."""
+    stream = f"BT /F1 12 Tf 20 100 Td ({text}) Tj ET"
+    objs = [
+        "<< /Type /Catalog /Pages 2 0 R >>",
+        "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 300 200] /Contents 4 0 R "
+        "/Resources << /Font << /F1 5 0 R >> >> >>",
+        f"<< /Length {len(stream)} >>\nstream\n{stream}\nendstream",
+        "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+    ]
+    out = "%PDF-1.4\n"
+    offsets = []
+    for n, body in enumerate(objs, 1):
+        offsets.append(len(out))
+        out += f"{n} 0 obj\n{body}\nendobj\n"
+    xref = len(out)
+    out += f"xref\n0 {len(objs) + 1}\n0000000000 65535 f \n"
+    out += "".join(f"{o:010d} 00000 n \n" for o in offsets)
+    out += f"trailer\n<< /Size {len(objs) + 1} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n"
+    return out.encode("latin-1")
 
-    pdf = Path(__file__).parent.parent / "docs/report/01-problem-statement.pdf"
-    assert len(extract_text(str(pdf)).split()) > 20
+
+def test_extract_text_from_pdf_with_text():
+    pdf = io.BytesIO(_text_pdf("Hello summarizer world"))
+    assert "Hello summarizer world" in extract_text(pdf)

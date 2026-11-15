@@ -27,3 +27,8 @@ faiss_index/
 Thumbs.db
 .vscode/
 .idea/
+
+# Project reports, slides and demo video (kept locally, not published)
+docs/report/
+docs/presentation/
+docs/media/
